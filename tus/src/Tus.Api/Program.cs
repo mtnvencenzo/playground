@@ -33,12 +33,12 @@ Debugger.Launch();
 // Use cloud events to automatically unpack the message data
 // app.UseCloudEvents();
 
-app.UseApplicationEndpoints();
-app.UseDefaultOpenApi();
-
 app.UseHttpsRedirection();
 app.UseCors("origin-policy");
 app.UseStaticFiles();
+
+app.UseApplicationEndpoints();
+app.UseDefaultOpenApi();
 app.UseExceptionHandler((builder) =>
 {
     builder.Run(async (context) =>

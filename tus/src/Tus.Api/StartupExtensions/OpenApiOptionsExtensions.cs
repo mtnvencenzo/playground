@@ -2,12 +2,9 @@
 
 using Asp.Versioning.ApiExplorer;
 using Tus.Api.Application.Behaviors;
-using Tus.Api.Domain.Config;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.OpenApi;
-using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
-using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Interfaces;
 using Microsoft.OpenApi.Models;
@@ -18,8 +15,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System;
-using System.Threading;
-using Microsoft.Extensions.Configuration;
 
 internal static class OpenApiOptionsExtensions
 {
@@ -54,27 +49,12 @@ internal static class OpenApiOptionsExtensions
         return options;
     }
 
-    internal static OpenApiOptions ApplySecuritySchemeDefinitions(this OpenApiOptions options)
-    {
-        return options;
-    }
+    internal static OpenApiOptions ApplySecuritySchemeDefinitions(this OpenApiOptions options) => options;
 
     internal static OpenApiOptions ApplyAuthorizationChecks(this OpenApiOptions options)
     {
         options.AddOperationTransformer((operation, context, cancellationToken) =>
         {
-            var scalarConfig = context.ApplicationServices.GetRequiredService<IOptions<ScalarConfig>>();
-
-            var metadata = context.Description.ActionDescriptor.EndpointMetadata;
-
-            var requiredScopesMetadatas = metadata.OfType<IAuthRequiredScopeMetadata>();
-
-            if (!requiredScopesMetadatas.Any())
-            {
-                operation.Security = [];
-                return Task.CompletedTask;
-            }
-
             operation.Security = [];
 
             return Task.CompletedTask;

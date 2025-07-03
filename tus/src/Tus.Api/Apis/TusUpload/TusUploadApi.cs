@@ -39,17 +39,7 @@ public static class TusUploadApi
             Store = new TusDiskStore(TemporaryFilePath),
             Events = new Events
             {
-                OnBeforeCreateAsync = async (context) =>
-                {
-                    try
-                    {
-                        await sender.Send(new BeforeCreateTusDocumentCommand(context), context.CancellationToken);
-                    }
-                    catch (Exception ex)
-                    {
-                        context.FailRequest(System.Net.HttpStatusCode.InternalServerError, ex.Message);
-                    }
-                },
+                OnBeforeCreateAsync = async (context) => await sender.Send(new BeforeCreateTusDocumentCommand(context), context.CancellationToken),
                 OnFileCompleteAsync = async (context) => await sender.Send(new TusDocumentCompleteCommand(context), context.CancellationToken)
             }
         });

@@ -1,0 +1,122 @@
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Tus Client</title>
+        <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js"></script>
+    </head>
+    <body>
+        <h1>Tus Client</h1>
+        <p>This is a test harness for the Tus API.</p>
+        <input type="file" id="fileInput" />
+        <button id="uploadButton" onclick="uploadFile()">Upload</button>
+        <div id="status"></div>
+
+        <script>
+            const rootUrl = 'https://localhost:7111/api/v1';
+
+            const tusEndpoint = `${rootUrl}/file-uploads`;
+            function updateStatus(message) {
+                document.getElementById('status').innerHTML += '<p>' + message + '</p>';
+                console.log(message);
+            }
+
+            function uploadFile() {
+                const fileInput = document.getElementById('fileInput');
+                const file = fileInput.files[0];
+
+                if (!file) {
+                    alert('No file selected');
+                    return;
+                }
+
+                updateStatus('Starting upload for file: ' + file.name + ' (' + file.size + ' bytes)');
+
+                const upload = new tus.Upload(file, {
+                    endpoint: `${rootUrl}/file-uploads`,
+                    retryDelays: [0, 3000, 5000, 10000, 20000],
+                    metadata: { 
+                        name: file.name,
+                        type: file.type,
+                    },
+                    onError: (error) => {
+                        updateStatus('Error uploading file: ' + error.message);
+                        console.error('Error uploading file:', error);
+                        console.error('Error details:', {
+                            name: error.name,
+                            message: error.message,
+                            stack: error.stack,
+                            originalRequest: error.originalRequest,
+                            originalResponse: error.originalResponse
+                        });
+                    },
+                    onProgress: (bytesUploaded, bytesTotal) => {
+                        const progress = (bytesUploaded / bytesTotal) * 100;
+                        updateStatus(`Upload progress: ${progress.toFixed(2)}% (${bytesUploaded}/${bytesTotal} bytes)`);
+                    },
+                    onSuccess: () => {
+                        updateStatus('File uploaded successfully!');
+                    },
+                    onAfterResponse: (req, res) => {
+                        updateStatus('Response received - Status: ' + res.getStatus());
+                        console.log('Response headers:', res.getHeader('x-tus-docid'));
+                        const uploadId = res.getHeader('x-tus-docid');
+                        if (uploadId) {
+                            updateStatus('Upload ID: ' + uploadId);
+                        }
+                    },
+                    onBeforeRequest: (req) => {
+                        updateStatus('Making request: ' + req.getMethod() + ' ' + req.getURL());
+                        console.log('Request headers:', req.getUnderlyingObject().getAllResponseHeaders());
+                    }
+                });
+
+                upload.start();
+            }
+
+            // Test server connectivity
+            function testServer() {
+                updateStatus('Testing server connectivity...');
+                fetch(`${rootUrl}/health/ping`)
+                    .then(response => {
+                        updateStatus('Server is reachable. Status: ' + response.status);
+                        return response.text();
+                    })
+                    .then(data => {
+                        updateStatus('Health check response: ' + data);
+                    })
+                    .catch(error => {
+                        updateStatus('Server connectivity test failed: ' + error.message);
+                    });
+            }
+
+            // Test TUS OPTIONS request
+            function testTusOptions() {
+                updateStatus('Testing TUS OPTIONS request...');
+                fetch(`${rootUrl}/file-uploads`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Tus-Resumable': '1.0.0'
+                    }
+                })
+                .then(response => {
+                    updateStatus('TUS OPTIONS response status: ' + response.status);
+                    updateStatus('TUS-Resumable header: ' + response.headers.get('Tus-Resumable'));
+                    updateStatus('Tus-Version header: ' + response.headers.get('Tus-Version'));
+                    updateStatus('Tus-Max-Size header: ' + response.headers.get('Tus-Max-Size'));
+                    return response.text();
+                })
+                .then(data => {
+                    updateStatus('TUS OPTIONS response body: ' + data);
+                })
+                .catch(error => {
+                    updateStatus('TUS OPTIONS test failed: ' + error.message);
+                });
+            }
+
+            // Add test buttons
+            document.body.innerHTML += '<br><button onclick="testServer()">Test Server</button>';
+            document.body.innerHTML += '<button onclick="testTusOptions()">Test TUS OPTIONS</button>';
+        </script>
+    </body>
+</html>

@@ -1,7 +1,0 @@
-
-POST {{host}}/api/v1/file-uploads
-Tus-Resumable: 1.0.0
-Upload-Metadata: name testfile.txt
-
-
-###

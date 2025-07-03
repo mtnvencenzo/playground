@@ -3,15 +3,11 @@
 using Cezzi.Applications;
 using Cezzi.Applications.Extensions;
 using Tus.Api.Domain;
-using Tus.Api.Domain.Config;
 using Tus.Api.Domain.Services;
 using Dapr.Client;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System;
-using System.Buffers.Text;
 using System.Collections.Generic;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;

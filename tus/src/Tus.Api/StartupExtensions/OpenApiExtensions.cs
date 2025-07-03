@@ -61,7 +61,7 @@ internal static class OpenApiExtensions
             // Disable default fonts to avoid download unnecessary fonts
             options.DefaultFonts = false;
             options.Favicon = "/favicon.svg";
-            options.Title = "Cezzi's Tus Api";
+            options.Title = "Tus Api";
             options.Theme = ScalarTheme.Purple;
             options.OpenApiRoutePattern = openApiPattern;
             options.Servers =

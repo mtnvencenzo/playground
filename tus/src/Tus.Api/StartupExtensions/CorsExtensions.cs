@@ -12,11 +12,12 @@ internal static class CorsExtensions
         {
             options.AddPolicy("origin-policy", corsBuilder =>
             {
-                corsBuilder.WithOrigins(configuration["AllowedOrigins"].Split(","))
-                    .AllowCredentials()
+                corsBuilder
+                    .AllowAnyOrigin()
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .WithExposedHeaders(tusdotnet.Helpers.CorsHelper.GetExposedHeaders())
+                    .WithExposedHeaders(configuration["TusApi:DocumentIdHeaderName"])
                     .SetPreflightMaxAge(TimeSpan.FromSeconds(600));
             });
         });

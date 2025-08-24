@@ -8,7 +8,8 @@
       "launchUrl": "/",
       "applicationUrl": "https://localhost:7171;http://localhost:7172",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "local"
+        "ASPNETCORE_ENVIRONMENT": "local",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317"
       }
     }
   }

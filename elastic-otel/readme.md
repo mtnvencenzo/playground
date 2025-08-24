@@ -20,9 +20,14 @@ This directory contains resources for running an [OpenTelemetry Collector](https
 
 2. **Start the OpenTelemetry Collector:**
 	```bash
-	docker compose -p elastic-stack-otel -f docker.compse.yml up -d
+	docker compose -p elastic-stack-otel -f docker-compose.yml up -d
 	```
 	This will start the OpenTelemetry Collector using the provided configuration and group the containers under the project name `elastic-stack-otel` in Docker Desktop and the CLI.
+
+	To bring the compose down, use this command
+	```bash
+	docker compose -p elastic-stack-otel -f docker-compose.yml down
+	```
 
 3. **Send Telemetry Data:**
 	- Point your application(s) to the OpenTelemetry Collector endpoint (as defined in `otel-collector-config.yml`).
@@ -40,7 +45,7 @@ This directory contains resources for running an [OpenTelemetry Collector](https
 
 - Check container logs for errors:
   ```bash
-	docker compose -p elastic-stack-otel -f docker.compse.yml logs
+	docker compose -p elastic-stack-otel -f docker-compose.yml logs
   ```
 - Ensure network connectivity between the collector and your Elastic instance.
 - Validate your credentials and endpoint URLs in the configuration file.

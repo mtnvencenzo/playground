@@ -8,6 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 internal static class ServiceDefaultsExtensions
@@ -16,7 +19,7 @@ internal static class ServiceDefaultsExtensions
 
     internal static IHostApplicationBuilder AddServiceDefaults(this IHostApplicationBuilder builder)
     {
-        builder.AddBasicServiceDefaults();
+        builder.AddBasicServiceDefaults("example-api");
 
         builder.Services.AddHttpCors(builder.Configuration);
 
@@ -38,7 +41,7 @@ internal static class ServiceDefaultsExtensions
         return builder;
     }
 
-    private static IHostApplicationBuilder AddBasicServiceDefaults(this IHostApplicationBuilder builder)
+    private static IHostApplicationBuilder AddBasicServiceDefaults(this IHostApplicationBuilder builder, string serviceName)
     {
         builder.Services.AddOptions();
         builder.Services.AddHttpClient();
@@ -53,34 +56,39 @@ internal static class ServiceDefaultsExtensions
         // Default health checks assume the event bus and self health checks
         builder.AddDefaultHealthChecks();
 
-        builder.AddApplicationOpenTelemetry();
+        builder.AddApplicationOpenTelemetry(serviceName);
 
         return builder;
     }
 
-    private static IHostApplicationBuilder AddApplicationOpenTelemetry(this IHostApplicationBuilder builder)
+    private static IHostApplicationBuilder AddApplicationOpenTelemetry(this IHostApplicationBuilder builder, string serviceName)
     {
         builder.Services.AddLogging();
 
-        builder.Logging.AddOpenTelemetry(logging =>
+        builder.Logging.AddOpenTelemetry(options =>
         {
-            logging.IncludeFormattedMessage = true;
-            logging.IncludeScopes = true;
+            options.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName));
 
+            options.IncludeFormattedMessage = true;
+            options.IncludeScopes = true;
+            options.AddOtlpExporter();
             if (builder.Environment.IsEnvironment("local"))
             {
-                //logging.AddConsoleExporter();
+                options.AddConsoleExporter();
             }
         });
 
         var openTelemetryBuilder = builder.Services
             .AddOpenTelemetry()
+            .ConfigureResource(resource => resource.AddService(serviceName))
             .WithTracing(tracing =>
             {
+                tracing.AddOtlpExporter();
+
                 if (builder.Environment.IsEnvironment("local"))
                 {
-                    // We want to view all traces in development
                     tracing.SetSampler(new AlwaysOnSampler());
+                    tracing.AddConsoleExporter();
                 }
 
                 tracing
@@ -95,6 +103,16 @@ internal static class ServiceDefaultsExtensions
                     })
                     .AddGrpcClientInstrumentation()
                     .AddHttpClientInstrumentation();
+            })
+            .WithMetrics(metrics =>
+            {
+                metrics.AddOtlpExporter();
+                metrics.AddAspNetCoreInstrumentation();
+
+                if (builder.Environment.IsEnvironment("local"))
+                {
+                    metrics.AddConsoleExporter();
+                }
             });
 
         if (!builder.Environment.IsEnvironment("local") && !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING")))

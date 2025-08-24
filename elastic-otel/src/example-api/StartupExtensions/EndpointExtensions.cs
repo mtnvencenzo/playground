@@ -12,7 +12,6 @@ internal static class EndpointExtensions
     internal static WebApplication UseApplicationEndpoints(this WebApplication app)
     {
         var rootApi = app.UseDefaultEndpoints();
-        rootApi.MapSubscribeHandler();
 
         var exampleApi = app.NewVersionedApi("Example")
             .MapGroup("api/v{version:apiVersion}")

@@ -67,8 +67,6 @@ else
 }
 
 app.UseCors("origin-policy");
-app.UseAuthentication();
-app.UseAuthorization();
 app.UseStaticFiles();
 app.UseExceptionHandler((builder) =>
 {

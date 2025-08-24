@@ -1,0 +1,17 @@
+{
+    "rest-client.enableTelemetry": false,
+    "rest-client.environmentVariables": {
+        "local": {
+          "host": "https://localhost:7176"
+        }
+    },
+    "dotnet.defaultSolution": "Example.Api.sln",
+    "files.exclude": {
+        "**/bin": true,
+        "**/obj": true
+    },
+    "search.exclude": {
+        "**/bin": true,
+        "**/obj": true
+    }
+}

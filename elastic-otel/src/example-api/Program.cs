@@ -1,7 +1,6 @@
 using Asp.Versioning;
 using Example.Api.Application.Behaviors.ExceptionHandling;
 using Example.Api.StartupExtensions;
-using Example.Api.Infrastructure;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,23 +27,6 @@ builder.AddDefaultOpenApi(apiVersioningBuilder);
 // build the app
 // -------------
 var app = builder.Build();
-
-#if DEBUG
-// Needed this when using cursor and DotRush, 
-// not needed for vscode and C# toolkit
-// Debugger.Launch();
-#endif
-
-// Initialize database if needed
-if (app.Environment.IsEnvironment("local"))
-{
-    using var scope = app.Services.CreateScope();
-    var initializer = scope.ServiceProvider.GetRequiredService<DatabaseInitializer>();
-    await initializer.InitializeAsync();
-}
-
-// Use cloud events to automatically unpack the message data
-// app.UseCloudEvents();
 
 app.UseApplicationEndpoints();
 app.UseDefaultOpenApi();

@@ -24,9 +24,6 @@ internal static class ApplicationServiceExtensions
             .AddEnvironmentVariables();
 
         builder.Services.Configure<ExampleApiConfig>(builder.Configuration.GetSection(ExampleApiConfig.SectionName));
-        builder.Services.Configure<CosmosDbConfig>(builder.Configuration.GetSection(CosmosDbConfig.SectionName));
-
-        builder.Services.AddCosomsContexts();
 
         // Add mediator and commands to DI
         builder.Services.AddMediatR(cfg =>

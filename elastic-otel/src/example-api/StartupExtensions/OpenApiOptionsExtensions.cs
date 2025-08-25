@@ -4,7 +4,6 @@ using Asp.Versioning.ApiExplorer;
 using Example.Api.Application.Behaviors;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.OpenApi;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Identity.Web;

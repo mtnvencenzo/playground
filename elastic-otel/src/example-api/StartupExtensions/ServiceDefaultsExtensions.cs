@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using OpenTelemetry;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -65,60 +66,60 @@ internal static class ServiceDefaultsExtensions
     {
         builder.Services.AddLogging();
 
-        builder.Logging.AddOpenTelemetry(options =>
+        builder.Logging.AddOpenTelemetry(logging =>
         {
-            options.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName));
-
-            options.IncludeFormattedMessage = true;
-            options.IncludeScopes = true;
-            options.AddOtlpExporter();
-            if (builder.Environment.IsEnvironment("local"))
-            {
-                options.AddConsoleExporter();
-            }
+            logging
+                .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
+                .AddOtlpExporter(options => { options.Endpoint = new Uri(Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT") ?? "http://otel-collector:4317"); })
+                .AddConsoleExporter();
         });
 
         var openTelemetryBuilder = builder.Services
             .AddOpenTelemetry()
             .ConfigureResource(resource => resource.AddService(serviceName))
+            .WithLogging(logging =>
+            {
+                logging
+                    .AddConsoleExporter()
+                    .AddOtlpExporter(options =>
+                    {
+                        options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+                        options.ExportProcessorType = ExportProcessorType.Simple;
+                        options.Endpoint = new Uri(Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT") ?? "http://otel-collector:4317");
+                    });
+            })
             .WithTracing(tracing =>
             {
-                tracing.AddOtlpExporter();
-
-                if (builder.Environment.IsEnvironment("local"))
-                {
-                    tracing.SetSampler(new AlwaysOnSampler());
-                    tracing.AddConsoleExporter();
-                }
-
                 tracing
-                    .AddAspNetCoreInstrumentation((o) => o.Filter = (httpContext) =>
+                    .SetSampler(new AlwaysOnSampler())
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddOtlpExporter(options =>
                     {
-                        if (ExcludedOTelRoutes.Contains(httpContext.Request.Path.Value, StringComparer.OrdinalIgnoreCase))
-                        {
-                            return false;
-                        }
-
-                        return true;
-                    })
-                    .AddGrpcClientInstrumentation()
-                    .AddHttpClientInstrumentation();
+                        options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+                        options.ExportProcessorType = ExportProcessorType.Simple;
+                        options.Endpoint = new Uri(Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT") ?? "http://otel-collector:4317");
+                    });
             })
             .WithMetrics(metrics =>
             {
-                metrics.AddOtlpExporter();
-                metrics.AddAspNetCoreInstrumentation();
-
-                if (builder.Environment.IsEnvironment("local"))
-                {
-                    metrics.AddConsoleExporter();
-                }
+                metrics
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddOtlpExporter(options =>
+                    {
+                        options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+                        options.ExportProcessorType = ExportProcessorType.Simple;
+                        options.Endpoint = new Uri(Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT") ?? "http://otel-collector:4317");
+                    });
             });
 
-        if (!builder.Environment.IsEnvironment("local") && !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING")))
-        {
-            openTelemetryBuilder.UseAzureMonitor();
-        }
+        //openTelemetryBuilder.UseOtlpExporter( OpenTelemetry.Exporter.OtlpExportProtocol.Grpc, "")
+
+        // if (!builder.Environment.IsEnvironment("local") && !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING")))
+        // {
+        //     openTelemetryBuilder.UseAzureMonitor();
+        // }
 
         return builder;
     }

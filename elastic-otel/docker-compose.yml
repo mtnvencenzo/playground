@@ -5,8 +5,9 @@ services:
       dockerfile: ./Dockerfile
     container_name: example-api
     environment:
-      - ASPNETCORE_ENVIRONMENT=local
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+      - ASPNETCORE_ENVIRONMENT=Production
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
     ports:
       - "7068:8080"
       - "7069:8081"
@@ -62,6 +63,7 @@ services:
       - ./otel-collector-config.yml:/etc/otel-collector-config.yml # Mount your OTel Collector config
     ports:
       - "4317:4317" # OTLP gRPC receiver
+      - "4318:4318" # OTLP Http receiver
     depends_on:
       - apm-server # Or directly elasticsearch if configured
     networks:

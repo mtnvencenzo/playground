@@ -1,0 +1,21 @@
+{
+    "rest-client.enableTelemetry": false,
+    "rest-client.environmentVariables": {
+        "local": {
+          "host": "https://localhost:7171"
+        },
+        "local-docker": {
+            "host": "http://localhost:7068",
+            "apimkey": ""
+        }
+    },
+    "dotnet.defaultSolution": "Example.Api.sln",
+    "files.exclude": {
+        "**/bin": true,
+        "**/obj": true
+    },
+    "search.exclude": {
+        "**/bin": true,
+        "**/obj": true
+    }
+}

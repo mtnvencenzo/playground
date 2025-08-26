@@ -1,0 +1,34 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": ".NET Core Launch (web)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/example-api/bin/Debug/net9.0/Example.Api.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/example-api",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s/scalar/v1"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "local",
+                "ASPNETCORE_URLS": "https://localhost:7171;http://localhost:7172"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            },
+            "logging": {
+                "moduleLoad": false
+            },
+            "justMyCode": true
+        }
+    ]
+}

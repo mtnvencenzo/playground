@@ -1,0 +1,48 @@
+# otel-collector-config.yml
+receivers:
+  # Accepts data from OpenTelemetry-instrumented services via OTLP over gRPC and HTTP.
+  otlp:
+    protocols:
+      grpc:
+        endpoint: "0.0.0.0:4317"
+      http:
+        endpoint: "0.0.0.0:4318"
+
+  hostmetrics:
+    collection_interval: 10m # default = 1m
+    initial_delay: 1m # default = 1s
+    scrapers:
+      cpu:
+      memory:
+      disk:
+
+processors:
+  # Batches data before sending to improve efficiency and reduce API calls.
+  batch:
+    timeout: 10s
+    send_batch_size: 100
+
+exporters:
+  # The Elastic exporter translates OpenTelemetry data to Elastic's protocol.
+  otlp/elastic:
+    endpoint: "http://apm-server:8200" # Target the APM Server within the Docker network.
+    tls:
+      insecure: true # Use this for local testing only; use proper TLS in production.
+
+service:
+  telemetry:
+    logs:
+      level: "debug"
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/elastic]
+    metrics:
+      receivers: [otlp, hostmetrics]
+      processors: [batch]
+      exporters: [otlp/elastic]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/elastic]

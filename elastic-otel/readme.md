@@ -1,10 +1,10 @@
-0 Elastic OpenTelemetry Collector
+# Elastic OpenTelemetry Collector
 
 This directory contains resources for running an [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) configured to export telemetry data to [Elastic Observability](https://www.elastic.co/observability). It provides a quick way to collect, process, and forward traces, metrics, and logs from your applications to an Elastic Stack instance for monitoring and analysis.
 
 ## 📁 Contents
 
-- **docker.compse.yml**: Docker Compose file to orchestrate the OpenTelemetry Collector and any supporting services.
+- **docker-compse.yml**: Docker Compose file to orchestrate the OpenTelemetry Collector and any supporting services.
 - **otel-collector-config.yml**: Configuration file for the OpenTelemetry Collector, specifying receivers, processors, and exporters (including Elastic).
 - **readme.md**: This documentation file.
 
@@ -26,7 +26,7 @@ This directory contains resources for running an [OpenTelemetry Collector](https
 
 	To bring the compose down, use this command
 	```bash
-	docker compose -p elastic-stack-otel -f docker-compose.yml down
+	docker compose -p elastic-stack-otel -f docker-compose.yml down -v
 	```
 
 3. **Send Telemetry Data:**

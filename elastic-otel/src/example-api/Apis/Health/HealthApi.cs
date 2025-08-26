@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Logging;
 using System.Net;
 
 /// <summary>
@@ -22,7 +23,6 @@ public static class HealthApi
     {
         var groupBuilder = app.MapGroup("/health")
             .WithName(nameof(GetPing))
-            .ExcludeFromDescription()
             .AllowAnonymous();
 
         groupBuilder.MapGet("/ping", GetPing)
@@ -43,6 +43,8 @@ public static class HealthApi
     [ProducesDefaultResponseType(typeof(ProblemDetails))]
     public static Ok<PingRs> GetPing([AsParameters] HealthServices healthServices)
     {
+        healthServices.Logger.LogInformation("Getting the server information");
+
         var ping = healthServices.Queries.GetPing();
 
         return TypedResults.Ok(ping);
@@ -55,6 +57,8 @@ public static class HealthApi
     [ProducesDefaultResponseType(typeof(ProblemDetails))]
     public static Ok<VersionRs> GetVersion([AsParameters] HealthServices healthServices)
     {
+        healthServices.Logger.LogInformation("Getting the api version");
+
         var version = healthServices.Queries.GetVersion();
 
         return TypedResults.Ok(version);

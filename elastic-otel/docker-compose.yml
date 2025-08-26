@@ -8,6 +8,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
       - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+    volumes: 
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     ports:
       - "7068:8080"
       - "7069:8081"

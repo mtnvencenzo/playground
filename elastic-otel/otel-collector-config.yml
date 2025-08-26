@@ -8,6 +8,14 @@ receivers:
       http:
         endpoint: "0.0.0.0:4318"
 
+  hostmetrics:
+    collection_interval: 10m # default = 1m
+    initial_delay: 1m # default = 1s
+    scrapers:
+      cpu:
+      memory:
+      disk:
+
 processors:
   # Batches data before sending to improve efficiency and reduce API calls.
   batch:
@@ -31,7 +39,7 @@ service:
       processors: [batch]
       exporters: [otlp/elastic]
     metrics:
-      receivers: [otlp]
+      receivers: [otlp, hostmetrics]
       processors: [batch]
       exporters: [otlp/elastic]
     logs:

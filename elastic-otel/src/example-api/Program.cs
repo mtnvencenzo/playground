@@ -7,7 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.AddServiceDefaults();
+
+builder.AddServiceDefaults("example-api");
 builder.AddApplicationServices();
 
 var apiVersioningBuilder = builder.Services.AddApiVersioning((o) =>

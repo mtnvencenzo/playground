@@ -89,6 +89,7 @@ internal static class ServiceDefaultsExtensions
 
         Sdk.CreateMeterProviderBuilder()
             .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
+            .AddRuntimeInstrumentation()
             .AddAspNetCoreInstrumentation()
             .AddOtlpExporter(options =>
             {

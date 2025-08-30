@@ -18,15 +18,22 @@ This directory contains resources for running an [OpenTelemetry Collector](https
 1. **Configure Elastic Exporter:**
 	- Edit `otel-collector-config.yml` and update the Elastic exporter section with your Elastic APM Server endpoint and authentication details (API key or username/password).
 
-2. **Start the OpenTelemetry Collector:**
+2. **Start the Elastic ELK stack services:**
+
 	```bash
 	docker compose -p elastic-stack-otel -f docker-compose.yml up -d
+
+	# Or if the containers have already been created
+	docker compose -p elastic-stack-otel -f docker-compose.yml start
+
 	```
+
 	This will start the OpenTelemetry Collector using the provided configuration and group the containers under the project name `elastic-stack-otel` in Docker Desktop and the CLI.
 
 	To bring the compose down, use this command
 	```bash
 	docker compose -p elastic-stack-otel -f docker-compose.yml down -v
+
 	```
 
 3. **Send Telemetry Data:**

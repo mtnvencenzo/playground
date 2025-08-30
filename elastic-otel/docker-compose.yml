@@ -19,31 +19,58 @@ services:
       - elastic-network
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.1.3
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false # For development, disable security
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.enrollment.enabled=false
     ports:
       - "9200:9200"
+    mem_limit: 2g
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health?wait_for_status=yellow"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+      start_period: 20s
+    ulimits:
+      # Required for Elasticsearch to function correctly
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
     networks:
       - elastic-network
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:8.17.1
+    image: docker.elastic.co/kibana/kibana:9.1.3
     container_name: kibana
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
       - xpack.security.enabled=false # For development, disable security
     ports:
       - "5601:5601"
+    mem_limit: 1g
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:5601/api/status"] # Or a more specific Kibana readiness endpoint
+      interval: 10s
+      timeout: 5s
+      retries: 240
+      start_period: 60s # Give Kibana time to start before checking
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy
     networks:
       - elastic-network
 
   apm-server:
-    image: docker.elastic.co/apm/apm-server:8.17.1
+    image: docker.elastic.co/apm/apm-server:9.1.3
     container_name: apm-server
     environment:
       - APM_SERVER_KIBANA_HOST=kibana:5601
@@ -51,9 +78,19 @@ services:
       - xpack.security.enabled=false # For development, disable security
     ports:
       - "8200:8200" # APM Server intake port
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:8200 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 24
+      start_period: 30s # Give APM Server time to start before health checks begin
+    restart: unless-stopped
     depends_on:
-      - elasticsearch
-      - kibana
+      elasticsearch:
+        condition: service_healthy
+      kibana:
+        condition: service_healthy
     networks:
       - elastic-network
 
@@ -66,8 +103,10 @@ services:
     ports:
       - "4317:4317" # OTLP gRPC receiver
       - "4318:4318" # OTLP Http receiver
+    mem_limit: 512m
+    restart: unless-stopped
     depends_on:
-      - apm-server # Or directly elasticsearch if configured
+      - apm-server
     networks:
       - elastic-network
 

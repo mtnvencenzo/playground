@@ -1,0 +1,25 @@
+# ==============================================================================
+# Requirements for data extraction agent
+# ==============================================================================
+# Prerequisites:
+# ------------------------------------------------------------------------------
+# Install pip if not already installed:
+# sudo apt install python3-pip
+#
+# Create a virtual environment (for package isolation from system-wide packages):
+# Install venv module if not already installed:
+#
+# sudo apt install python3.12-venv
+# python3 -m venv .venv
+# source .venv/bin/activate
+
+
+# ==============================================================================
+# Required packages: make install
+# ==============================================================================
+# Common packages
+pydantic-settings==2.11.0
+urllib3==2.5.0
+
+# Api Client Generation
+openapi-python-client==0.26.2
